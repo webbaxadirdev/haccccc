@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>LEVEL//ROOT — Bubble Level</title>
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon-192.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon-512.svg" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="bg">
+    <div class="bg-orb orb1"></div>
+    <div class="bg-orb orb2"></div>
+    <div class="bg-orb orb3"></div>
+    <div class="grain" aria-hidden="true"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <div class="brand-title">LEVEL//ROOT</div>
+        <div class="brand-sub">DEVICE ORIENTATION • HUD MODE • CALIBRATE</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btnFullscreen" class="btn btn-ghost" type="button" title="Fullscreen">
+        <span class="ico">⛶</span><span class="hide-sm">Fullscreen</span>
+      </button>
+      <button id="btnHelp" class="btn btn-ghost" type="button" title="Help">
+        <span class="ico">?</span><span class="hide-sm">Help</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero card">
+      <div class="hero-left">
+        <div class="kpi">
+          <div class="k">
+            <div class="k-label">X (gamma)</div>
+            <div class="k-val"><span id="kGamma">0.0</span><span class="deg">°</span></div>
+          </div>
+          <div class="k">
+            <div class="k-label">Y (beta)</div>
+            <div class="k-val"><span id="kBeta">0.0</span><span class="deg">°</span></div>
+          </div>
+          <div class="k">
+            <div class="k-label">Status</div>
+            <div class="k-val k-status" id="kStatus">idle</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="btnStart" class="btn btn-primary" type="button">
+            <span class="ico">⚡</span> Start / Permission
+          </button>
+          <button id="btnCalibrate" class="btn btn-soft" type="button">
+            <span class="ico">◎</span> Calibrate (0°)
+          </button>
+          <button id="btnReset" class="btn btn-ghost" type="button">
+            <span class="ico">↺</span> Reset
+          </button>
+        </div>
+
+        <div class="sliders">
+          <div class="row">
+            <div class="row-label">
+              <span>Sensitivity</span>
+              <span class="chip" id="chipSens">2.6×</span>
+            </div>
+            <input id="sens" type="range" min="1.4" max="4.2" step="0.1" value="2.6" />
+          </div>
+
+          <div class="row">
+            <div class="row-label">
+              <span>Smooth</span>
+              <span class="chip" id="chipSmooth">0.14</span>
+            </div>
+            <input id="smooth" type="range" min="0.06" max="0.35" step="0.01" value="0.14" />
+          </div>
+
+          <label class="toggle">
+            <input id="haptics" type="checkbox" checked />
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span class="toggle-label">Haptics (vibrate on center)</span>
+          </label>
+
+          <label class="toggle">
+            <input id="sound" type="checkbox" checked />
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span class="toggle-label">Sound (tiny blip on perfect)</span>
+          </label>
+
+          <label class="toggle">
+            <input id="autoCal" type="checkbox" checked />
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span class="toggle-label">Auto‑calibrate (hold still)</span>
+          </label>
+
+          <label class="toggle">
+            <input id="demo" type="checkbox" />
+            <span class="toggle-ui" aria-hidden="true"></span>
+            <span class="toggle-label">Desktop Demo (mouse)</span>
+          </label>
+        </div>
+
+        <div class="hint">
+          <span class="dot"></span>
+          <span>TARGET: CENTER LOCK. Markazga kelsa → ACCESS GRANTED. Aks holda → ACCESS DENIED.</span>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="level" id="level">
+          <div class="level-surface" aria-hidden="true"></div>
+          <canvas class="matrix" id="matrix" aria-hidden="true"></canvas>
+          <div class="scanlines" aria-hidden="true"></div>
+          <div class="hud" aria-hidden="true">
+            <div class="hud-left">
+              <div class="hud-row"><span class="hud-k">SYS</span><span class="hud-v" id="hudSys">ONLINE</span></div>
+              <div class="hud-row"><span class="hud-k">AUTH</span><span class="hud-v" id="hudAuth">PENDING</span></div>
+            </div>
+            <div class="hud-right">
+              <div class="hud-row"><span class="hud-k">SIG</span><span class="hud-v" id="hudSig">0.00</span></div>
+              <div class="hud-row"><span class="hud-k">MODE</span><span class="hud-v" id="hudMode">SENSOR</span></div>
+            </div>
+          </div>
+
+          <div class="reticle" aria-hidden="true">
+            <div class="r r1"></div>
+            <div class="r r2"></div>
+            <div class="r r3"></div>
+            <div class="cross"></div>
+          </div>
+
+          <div class="bubble" id="bubble" aria-label="Bubble">
+            <div class="bubble-glow" aria-hidden="true"></div>
+            <div class="bubble-core" aria-hidden="true"></div>
+          </div>
+
+          <div class="badge" id="badge">idle</div>
+        </div>
+
+        <div class="mini card-mini">
+          <div class="mini-title">Ops//Tip</div>
+          <div class="mini-body">
+            iPhone/iPad: “Start / Permission” → Allow.
+            HTTPS/localhost bo‘lmasa sensor blok bo‘lishi mumkin.
+          </div>
+        </div>
+
+        <div class="terminal card-mini" id="terminal">
+          <div class="terminal-head">
+            <div class="t-title">TERMINAL//FEED</div>
+            <div class="t-badges">
+              <span class="t-pill" id="tState">PENDING</span>
+              <span class="t-pill">v1.0</span>
+            </div>
+          </div>
+
+          <div class="term-body" id="termBody" aria-live="polite"></div>
+
+          <div class="term-foot">
+            <div class="progress">
+              <div class="bar" id="bar"></div>
+            </div>
+            <div class="term-hint">Center lock → unlock sequence</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="footer">
+      <div class="foot-left">
+        <span class="pill">HUD</span>
+        <span class="pill">Matrix</span>
+        <span class="pill">Access Gate</span>
+      </div>
+      <div class="foot-right">
+        <span class="muted">Made for</span> <span class="mono">Secpentester</span>
+        <span class="pill pill-orient" id="pillOrient">portrait</span>
+
+        <div class="terminal card-mini" id="terminal">
+          <div class="terminal-head">
+            <div class="t-title">TERMINAL//FEED</div>
+            <div class="t-badges">
+              <span class="t-pill" id="tState">PENDING</span>
+              <span class="t-pill">v1.0</span>
+            </div>
+          </div>
+
+          <div class="term-body" id="termBody" aria-live="polite"></div>
+
+          <div class="term-foot">
+            <div class="progress">
+              <div class="bar" id="bar"></div>
+            </div>
+            <div class="term-hint">Center lock → unlock sequence</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- HELP MODAL -->
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="modalClose"></div>
+    <div class="modal-card card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Help</div>
+          <div class="modal-sub">Nega ishlamayapti? Qanday ishlataman?</div>
+        </div>
+        <button class="btn btn-ghost" id="modalX" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <ul class="list">
+          <li><b>iPhone/iPad:</b> Start tugmasi → Permission so‘rasa “Allow”.</li>
+          <li><b>HTTPS kerak:</b> Sensor faqat HTTPS yoki localhost’da ishlaydi.</li>
+          <li><b>Calibrate:</b> Telefonni tekis qo‘yib “Calibrate” bosing.</li>
+          <li><b>Desktop:</b> “Desktop Demo” yoqing va sichqoncha bilan harakatlantiring.</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modalOk" type="button">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
